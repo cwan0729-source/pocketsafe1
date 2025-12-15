@@ -1,0 +1,124 @@
+.post-page {
+    padding: 16px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.pp-logo {
+    font-size: 20px;
+    font-weight: bold;
+    font-weight: 800;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.post-title{
+    border: 2px solid #8b5a2b;
+    border-radius: 90px;
+    padding: 10px;
+    margin: 12px 0;
+    text-align: center;
+    background: #ffffff;
+}
+
+.post-top{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+.write-btn {
+    background: #8b5a2b;
+    color: #ffffff;
+    border-radius: 8px;
+    padding: 6px 12px;
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    color: #333;
+    font-size: 12px;
+    cursor: pointer;
+    text-align: right;
+}
+
+.post-grid {
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.post-card{
+    background: #dff0d8;
+    border-radius: 12px;
+    padding: 8px;
+    border: 1px solid #8a6a47;
+}
+
+.post-card p {
+    margin-top: 6px;
+    font-size: 14px;
+}
+
+.overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 10;
+}
+
+.modal {
+    background: #dff0d8;
+    padding: 22px;
+    border-radius: 15px;
+    width: 70%;
+    max-width: 400px;
+    margin: 120px auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.modal textarea {
+    width: 70%;
+    min-height: 80px;
+    resize: none;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid #8a6a47;
+    font-size: 14px;
+    background-color: white;
+    color: #333;
+}
+
+.modal .close{
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.modal button:not(.close) {
+    align-self: flex-end;
+    padding: 6px 14px;
+    border-radius: 14px;
+    background: #8b5a2b;
+    color: white;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.h-d{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 6px;
+}
