@@ -117,6 +117,9 @@
     color: white;
 }
 
+.level.empty {
+    color: #333;
+}
 
 .btn-area {
     margin-top:15px;

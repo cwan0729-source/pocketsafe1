@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import "./MapView.css";
 
 export default function MapView({ center, onSelectPlace }) {
@@ -48,17 +48,16 @@ export default function MapView({ center, onSelectPlace }) {
                 (data, status)=>{
                     if(status !== window.kakao.maps.services.Status.OK) return;
 
-                    data.forEach((place)=>{
+                    data.forEach((place)=>{ //검색된 장소마다 마커 찍음
                         const marker = new window.kakao.maps.Marker({
                             map: map.current, position: new window.kakao.maps.LatLng(place.y, place.x),
                         });
-
+                        //마커 클릭 이벤트
                         window.kakao.maps.event.addListener(marker, "click", ()=>{
                             const input = document.querySelector(".search-input"); //키보드 x
                             if (input) input.blur();
 
-                            console.log("마커 클릭됨", place.place_name);
-                            onSelectPlace(place);
+                            onSelectPlace(place); //선택된 장소 데이터를 MainPage로 전달
                         });
                         markers.current.push(marker);
                     });
@@ -67,7 +66,7 @@ export default function MapView({ center, onSelectPlace }) {
             );
         });
     };
-
+    //카카오맵이 SDK로딩이 비동기가 지도생성 시점 불안정(한번안뜬적있음) 안전장치로 한번 더 주변 장소 탐색
     useEffect(()=>{
         if(!map.current) return;
 

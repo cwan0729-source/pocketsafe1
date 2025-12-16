@@ -12,11 +12,12 @@ function MainPage() {
     const [ center, setCenter ] = useState({ lat: 37.5665, lng: 126.9780});
     const [places, setPlaces] = useState([]);
     const [selectedPlace, setSelectedPlace] = useState(null);
-    const [ avgScores, setAvgScores] = useState({});
+    const [ mostScores, setMostScores] = useState({});
     const [user, setUser] = useState(null);
     const [openAuth, setOpenAuth] = useState(false);
     const [openEstimate,setOpenEstimate] = useState(false);
     
+    //로그인/로그아웃 user 자동 갱신
     useEffect(()=> {
         const auth=getAuth();
         const unsub = onAuthStateChanged(auth, (user)=>{
@@ -29,47 +30,54 @@ function MainPage() {
     const PlaceEstimate = async (place) =>{
         setSelectedPlace(place);
 
+        //사람들이 평가한 내용들 가져옴
         const ratingsRef = collection(db, "places", place.id, "ratings");
         const snapshot = await getDocs(ratingsRef);
 
+        //평가 없으면 종료
         if(snapshot.empty){
-            setAvgScores({});
+            setMostScores({});
             return;
         }
 
+        //항목별 평가 모으기 통
         let all = {safety:[], clean:[], crowd:[], facility:[], pet:[]};
 
+        //평가를 꺼낸 후 항목별 확인하고 있으면 해달 배열에 추가
         snapshot.forEach((doc)=>{
-            const d = doc.data();
+            const d = doc.data(); 
             Object.keys(all).forEach((key)=>{
                 if (d[key]) all[key].push(d[key]);
             });
         });
 
-        const calcAvg = (list) =>{
+        //가장 많이 나온 값 선택
+        const getMostSelected = (list) =>{
             if (list.length === 0) return "-";
             const count = {};
-            list.forEach((v)=>{ count[v]=(count[v]||0) + 1});
-            return Object.entries(count).sort((a, b)=> b[1] - a[1])[0][0];
+            list.forEach((v)=>{ count[v]=(count[v]||0) + 1}); //ex "좋음":3, "보통":1
+            return Object.entries(count).sort((a, b)=> b[1] - a[1])[0][0]; //내림차순
         };
 
-        setAvgScores({
-            safety: calcAvg(all.safety),
-            clean: calcAvg(all.clean),
-            crowd: calcAvg(all.crowd),
-            facility: calcAvg(all.facility),
-            pet: calcAvg(all.pet),
+        //최종 저장
+        setMostScores({
+            safety: getMostSelected(all.safety),
+            clean: getMostSelected(all.clean),
+            crowd: getMostSelected(all.crowd),
+            facility: getMostSelected(all.facility),
+            pet: getMostSelected(all.pet),
         });
     };
 
-    const againAvg = async () =>{
+    // 평가 저장 후 최신 결과 실시간 반영용
+    const againMost = async () =>{
         if(!selectedPlace) return;
 
         const ratingsRef = collection(db, "places", selectedPlace.id, "ratings");
         const snapshot = await getDocs(ratingsRef);
 
         if(snapshot.empty){
-            setAvgScores({});
+            setMostScores({});
             return;
         }
 
@@ -82,24 +90,24 @@ function MainPage() {
             });
         });
 
-        const calcAvg = (list) =>{
+        const getMostSelected = (list) =>{
             if (list.length === 0) return "-";
             const count = {};
             list.forEach((v)=>{ count[v]=(count[v]||0) + 1});
             return Object.entries(count).sort((a, b)=> b[1] - a[1])[0][0];
         };
 
-        setAvgScores({
-            safety: calcAvg(all.safety),
-            clean: calcAvg(all.clean),
-            crowd: calcAvg(all.crowd),
-            facility: calcAvg(all.facility),
-            pet: calcAvg(all.pet),
+        setMostScores({
+            safety: getMostSelected(all.safety),
+            clean: getMostSelected(all.clean),
+            crowd: getMostSelected(all.crowd),
+            facility: getMostSelected(all.facility),
+            pet: getMostSelected(all.pet),
         });
     };
 
 
-
+    //키워드로 장소 검색 + 중심 이동 + 검색된 장소 state 저장
     const handleSearch = (keyword) => {
         if (!keyword) return;
 
@@ -122,6 +130,7 @@ function MainPage() {
             }   
          });
     };
+    //마지막 클릭한 지도 위치 저장
     useEffect(()=>{
         const last = localStorage.getItem("lastSearch");
         if(last) handleSearch(last);
@@ -130,13 +139,13 @@ function MainPage() {
     const SubmitRating = async (scores) => {
         if (!user || !selectedPlace) return;
 
-        const ref = doc(db, "places", selectedPlace.id, "ratings", user.uid);
+        const ref = doc(db, "places", selectedPlace.id, "ratings", user.uid); //1인당 1번 평가
         await setDoc(ref,{
             ...scores, timestamp: Date.now(),
         });
         alert("평가 저장 완료");
         setOpenEstimate(false);
-        againAvg();
+        againMost(); //실시간 반영
     };
 
     return(
@@ -146,7 +155,7 @@ function MainPage() {
 
             {openAuth && (<Login onClose={()=> setOpenAuth(false)}/>)}
             {selectedPlace && ( <PlaceInfo place={selectedPlace} Close={()=> setSelectedPlace(null)}
-                avgScores={avgScores} user={user} onOpenEstimate={()=> setOpenEstimate(true)}/*onRatingSaved={againAvg}*//>
+                mostScores={mostScores} user={user} onOpenEstimate={()=> setOpenEstimate(true)}/>
             
             )}
             {openEstimate && selectedPlace && (<Estimate close={()=> setOpenEstimate(false)} onSubmit={SubmitRating}/>)}

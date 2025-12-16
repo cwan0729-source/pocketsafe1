@@ -10,19 +10,21 @@ export default function PostPage() {
     const { state } = useLocation();
     const place = state?.place;
 
-    const auth = getAuth();
+
     const [user, setUser ] = useState(null);
     const [posts, setPosts ] = useState([]);
     const [sort, setSort] = useState("latest");
     const [openModal, setOpenModal]= useState(false);
     const [text, setText]=useState("");
 
+
+    //게시글 불러오기 + 정렬
     const fetchPosts = async () => {
         const q = query(collection(db, "places", placeId, "posts"));
         const snapshot = await getDocs(q);
         let postList = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
 
-        if(sort === "latest"){
+        if(sort === "latest"){ //정렬
             postList.sort((a, b) => b.createdAt?.toDate() - a.createdAt?.toDate());
         } else if (sort === "likes"){
             postList.sort((a, b)=> (b.likes?.length || 0) - (a.likes?.length || 0));
@@ -48,7 +50,6 @@ export default function PostPage() {
             return;
         }
 
-        const userId = user.uid || "unknown";
 
         await addDoc(collection(db, "places", placeId, "posts"), {
             text, userId: user.uid, userEmail: user.email,
